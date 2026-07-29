@@ -1,8 +1,8 @@
 package com.pestdetect.app.utils;
 
 public class Constants {
-    // Backend API Base URL (10.0.2.2 for Android Emulator connecting to local server)
-    public static final String BASE_URL = "http://10.0.2.2:5000/api/";
+    // Live Railway Production Backend Base URL
+    public static final String BASE_URL = "https://pestbackend-production.up.railway.app/api/";
     
     // Intent Extras
     public static final String EXTRA_IMAGE_PATH = "extra_image_path";
