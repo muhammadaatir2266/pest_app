@@ -1,0 +1,101 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="app_name">PestDetect</string>
+    <string name="app_tagline">Smart Pest Assistant for Farmers</string>
+
+    <!-- Language Selection -->
+    <string name="select_language">Select Your Language / اپنی زبان منتخب کریں</string>
+    <string name="english">English</string>
+    <string name="urdu">اردو (Urdu)</string>
+    <string name="continue_btn">Continue</string>
+
+    <!-- Onboarding -->
+    <string name="skip">Skip</string>
+    <string name="next">Next</string>
+    <string name="get_started">Get Started</string>
+    <string name="onboarding_title_1">Snap &amp; Detect Pests</string>
+    <string name="onboarding_desc_1">Take a clear photo of any pest or insect found on your crops.</string>
+    <string name="onboarding_title_2">Instant Harm &amp; Crop Analysis</string>
+    <string name="onboarding_desc_2">Know instantly whether the pest is harmful to your wheat, cotton, or rice crops.</string>
+    <string name="onboarding_title_3">Pesticide &amp; Solution Guide</string>
+    <string name="onboarding_desc_3">Get accurate dosage, application methods, and organic pesticide alternatives.</string>
+
+    <!-- Auth -->
+    <string name="login_title">Farmer Login</string>
+    <string name="signup_title">Create Account</string>
+    <string name="full_name">Full Name</string>
+    <string name="email_or_phone">Email or Phone Number</string>
+    <string name="phone_number">Phone Number</string>
+    <string name="password">Password</string>
+    <string name="farm_location">Farm Location (City/District)</string>
+    <string name="login">Login</string>
+    <string name="signup">Sign Up</string>
+    <string name="continue_as_guest">Continue as Guest</string>
+    <string name="enter_otp">Enter 6-Digit OTP Code</string>
+    <string name="verify_otp">Verify OTP</string>
+    <string name="otp_sent">OTP sent to your phone number</string>
+
+    <!-- Navigation -->
+    <string name="nav_home">Home</string>
+    <string name="nav_history">History</string>
+    <string name="nav_scan">Scan Pest</string>
+    <string name="nav_profile">Profile</string>
+    <string name="nav_settings">Settings</string>
+
+    <!-- Home -->
+    <string name="welcome_farmer">Welcome, Farmer!</string>
+    <string name="scan_pest_btn">SCAN PEST NOW</string>
+    <string name="tap_to_capture">Tap button to take a photo of insect</string>
+    <string name="recent_scans">Recent Scans</string>
+    <string name="view_all">View All</string>
+    <string name="no_recent_scans">No pest scans yet. Tap the green scan button above to analyze your first pest!</string>
+
+    <!-- Camera & Preview -->
+    <string name="camera_title">Point Camera at Pest</string>
+    <string name="take_photo">Take Photo</string>
+    <string name="open_gallery">Choose from Gallery</string>
+    <string name="toggle_flash">Flash</string>
+    <string name="confirm_photo">Confirm Photo</string>
+    <string name="retake_photo">Retake</string>
+    <string name="analyze_pest">ANALYZE PEST</string>
+
+    <!-- Analyzing Loading Screen -->
+    <string name="analyzing_pest">Analyzing Pest Image...</string>
+    <string name="analyzing_subtext">Connecting to Hugging Face AI Vision Model</string>
+
+    <!-- Result Screen -->
+    <string name="result_title">Detection Result</string>
+    <string name="confidence_score">Match Confidence: %d%%</string>
+    <string name="badge_harmful">HARMFUL TO CROPS</string>
+    <string name="badge_safe">NOT HARMFUL (BENEFICIAL)</string>
+    <string name="affected_crops_title">Affected Crops &amp; Damage</string>
+    <string name="recommended_pesticides_title">Recommended Pesticides</string>
+    <string name="dosage">Dosage: %s</string>
+    <string name="application_method">Application: %s</string>
+    <string name="safety_notes">Safety Warning: %s</string>
+    <string name="type_organic">Organic Option</string>
+    <string name="type_chemical">Chemical Insecticide</string>
+    <string name="share_result">Share on WhatsApp / SMS</string>
+    <string name="consult_expert">Consult Agriculture Expert</string>
+
+    <!-- History -->
+    <string name="history_title">Scan History</string>
+    <string name="filter_all">All Crops</string>
+    <string name="offline_mode_banner">You are offline. Scans are saved locally and will sync when internet returns.</string>
+
+    <!-- Profile & Settings -->
+    <string name="profile_title">Farmer Profile</string>
+    <string name="edit_profile">Edit Profile</string>
+    <string name="preferred_language">Preferred Language</string>
+    <string name="logout">Logout</string>
+    <string name="settings_title">App Settings</string>
+    <string name="notifications">Scan &amp; Weather Alerts</string>
+    <string name="offline_info">Offline Mode Info</string>
+    <string name="about_app">About PestDetect</string>
+    <string name="help_support">Help &amp; FAQ</string>
+
+    <!-- Errors & General -->
+    <string name="error_connection">Couldn\'t connect. Check your internet connection and try again.</string>
+    <string name="retry">Retry</string>
+    <string name="permission_camera_required">Camera permission is required to capture pest photos.</string>
+</resources>

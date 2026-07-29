@@ -1,0 +1,101 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="app_name">پیسٹ ڈیٹیکٹ</string>
+    <string name="app_tagline">کسانوں کے لیے سمارٹ کیڑا شناختی اسسٹنٹ</string>
+
+    <!-- Language Selection -->
+    <string name="select_language">اپنی زبان منتخب کریں / Select Your Language</string>
+    <string name="english">English (انگریزی)</string>
+    <string name="urdu">اردو</string>
+    <string name="continue_btn">آگے بڑھیں</string>
+
+    <!-- Onboarding -->
+    <string name="skip">چھوڑیں</string>
+    <string name="next">اگلا</string>
+    <string name="get_started">شروع کریں</string>
+    <string name="onboarding_title_1">کیڑے کی تصویر لیں</string>
+    <string name="onboarding_desc_1">اپنی فصل پر موجود کسی بھی کیڑے یا سُنڈی کی واضح تصویر لیں۔</string>
+    <string name="onboarding_title_2">فوری نقصان کی تشخیص</string>
+    <string name="onboarding_desc_2">فوری جانیں کہ کیڑا گندم، کپاس، یا چاول کی فصل کے لیے نقصان دہ ہے یا نہیں۔</string>
+    <string name="onboarding_title_3">ادویات اور حل کی رہنما کتاب</string>
+    <string name="onboarding_desc_3">صحیح مقدار، چھڑکاؤ کا طریقہ اور قدرتی متبادل ادویات کی معلومات حاصل کریں۔</string>
+
+    <!-- Auth -->
+    <string name="login_title">کسان لاگ ان</string>
+    <string name="signup_title">نیا اکاؤنٹ بنائیں</string>
+    <string name="full_name">پورا نام</string>
+    <string name="email_or_phone">ای میل یا فون نمبر</string>
+    <string name="phone_number">فون نمبر</string>
+    <string name="password">پاس ورڈ</string>
+    <string name="farm_location">فارم کا مقام (شہر/ضلع)</string>
+    <string name="login">لاگ ان کریں</string>
+    <string name="signup">سائن اپ کریں</string>
+    <string name="continue_as_guest">بطور مہمان (Guest) جاری رکھیں</string>
+    <string name="enter_otp">6 ہندسوں کا OTP کوڈ درج کریں</string>
+    <string name="verify_otp">کوڈ کی تصدیق کریں</string>
+    <string name="otp_sent">کوڈ آپ کے فون نمبر پر بھیج دیا گیا ہے</string>
+
+    <!-- Navigation -->
+    <string name="nav_home">ہوم</string>
+    <string name="nav_history">ہسٹری</string>
+    <string name="nav_scan">کیڑا اسکین کریں</string>
+    <string name="nav_profile">پروفائل</string>
+    <string name="nav_settings">سیٹنگز</string>
+
+    <!-- Home -->
+    <string name="welcome_farmer">خوش آمدید کسان بھائی!</string>
+    <string name="scan_pest_btn">کیڑا اسکین کریں</string>
+    <string name="tap_to_capture">کیڑے کی تصویر لینے کے لیے بٹن دبائیں</string>
+    <string name="recent_scans">حالیہ اسکینز</string>
+    <string name="view_all">سب دیکھیں</string>
+    <string name="no_recent_scans">ابھی تک کوئی اسکین نہیں ہوا۔ پہلا اسکین کرنے کے لیے اوپر دیے گئے سبز بٹن کو دبائیں۔</string>
+
+    <!-- Camera & Preview -->
+    <string name="camera_title">کیمرا کیڑے پر رکھیں</string>
+    <string name="take_photo">تصویر لیں</string>
+    <string name="open_gallery">گیلری سے منتخب کریں</string>
+    <string name="toggle_flash">فلیش لائٹ</string>
+    <string name="confirm_photo">تصویر کی تصدیق کریں</string>
+    <string name="retake_photo">دوبارہ لیں</string>
+    <string name="analyze_pest">کیڑے کا تجزیہ کریں</string>
+
+    <!-- Analyzing Loading Screen -->
+    <string name="analyzing_pest">کیڑے کی تصویر کا تجزیہ ہو رہا ہے...</string>
+    <string name="analyzing_subtext">ہگنگ فیس AI ماڈل کے ساتھ رابطہ ہو رہا ہے</string>
+
+    <!-- Result Screen -->
+    <string name="result_title">تشخیص کا نتیجہ</string>
+    <string name="confidence_score">شناخت کی درستگی: %d%%</string>
+    <string name="badge_harmful">فصل کے لیے نقصان دہ</string>
+    <string name="badge_safe">نقصان دہ نہیں (مفید کیڑا)</string>
+    <string name="affected_crops_title">متاثرہ فصلیں اور نقصان</string>
+    <string name="recommended_pesticides_title">تجویز کردہ ادویات</string>
+    <string name="dosage">مقدار: %s</string>
+    <string name="application_method">استعمال کا طریقہ: %s</string>
+    <string name="safety_notes">احتیاطی تدابیر: %s</string>
+    <string name="type_organic">قدرتی / آرگینک دوا</string>
+    <string name="type_chemical">کیمیائی زہر</string>
+    <string name="share_result">واٹس ایپ / ایس ایم ایس پر شیئر کریں</string>
+    <string name="consult_expert">زرعی ماہر سے مشورہ کریں</string>
+
+    <!-- History -->
+    <string name="history_title">سابقہ اسکینز</string>
+    <string name="filter_all">تمام فصلیں</string>
+    <string name="offline_mode_banner">آپ آف لائن ہیں۔ اسکینز محفوظ کر لیے گئے ہیں اور انٹرنیٹ آنے پر اپ لوڈ ہوں گے۔</string>
+
+    <!-- Profile & Settings -->
+    <string name="profile_title">کسان پروفائل</string>
+    <string name="edit_profile">پروفائل تبدیل کریں</string>
+    <string name="preferred_language">ترجیحی زبان</string>
+    <string name="logout">لاگ آؤٹ</string>
+    <string name="settings_title">ایپ سیٹنگز</string>
+    <string name="notifications">الرٹس اور خبریں</string>
+    <string name="offline_info">آف لائن موڈ کی معلومات</string>
+    <string name="about_app">ایپ کے بارے میں</string>
+    <string name="help_support">مدد اور سوالات</string>
+
+    <!-- Errors & General -->
+    <string name="error_connection">انٹرنیٹ کنکشن دستیاب نہیں ہے۔ دوبارہ کوشش کریں۔</string>
+    <string name="retry">دوبارہ کوشش کریں</string>
+    <string name="permission_camera_required">کیڑے کی تصویر کے لیے کیمرے کی اجازت ضروری ہے۔</string>
+</resources>
