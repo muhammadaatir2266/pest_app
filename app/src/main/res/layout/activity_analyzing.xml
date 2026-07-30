@@ -8,13 +8,15 @@
     android:orientation="vertical"
     android:padding="32dp">
 
-    <com.airbnb.android.lottie.LottieAnimationView
-        android:id="@+id/lottieView"
-        android:layout_width="240dp"
-        android:layout_height="240dp"
-        app:lottie_autoPlay="true"
-        app:lottie_loop="true"
-        app:lottie_rawRes="@raw/scan_leaf_anim" />
+    <com.google.android.material.progressindicator.CircularProgressIndicator
+        android:id="@+id/progressCircular"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:indeterminate="true"
+        app:indicatorColor="@color/white"
+        app:indicatorSize="140dp"
+        app:trackColor="#40FFFFFF"
+        app:trackThickness="8dp" />
 
     <TextView
         android:layout_width="wrap_content"
