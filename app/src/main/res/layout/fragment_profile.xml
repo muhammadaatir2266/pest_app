@@ -113,7 +113,7 @@
         style="@style/Widget.Material3.Button.OutlinedButton"
         android:layout_width="match_parent"
         android:layout_height="60dp"
-        android:layout_marginTop="auto"
+        android:layout_marginTop="24dp"
         android:text="@string/logout"
         android:textColor="@color/harmful_red"
         android:textSize="16sp"

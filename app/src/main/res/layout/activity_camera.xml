@@ -45,7 +45,7 @@
             android:layout_height="48dp"
             android:background="?attr/selectableItemBackgroundBorderless"
             android:contentDescription="@string/toggle_flash"
-            android:src="@android:drawable/ic_menu_always_landscape"
+            android:src="@drawable/ic_flash_on"
             app:tint="@color/white" />
     </LinearLayout>
 
