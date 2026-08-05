@@ -1,0 +1,32 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <!-- Primary Agriculture Greens (Optimized for Dark Theme Contrast) -->
+    <color name="green_primary">#4C9A2A</color>
+    <color name="green_primary_dark">#1E5631</color>
+    <color name="green_accent">#66BB6A</color>
+    <color name="green_light">#1E3A27</color>
+    <color name="gold_accent">#FFCA28</color>
+
+    <!-- Badges & Status -->
+    <color name="harmful_red">#FF6B6B</color>
+    <color name="harmful_red_bg">#3D1C1C</color>
+    <color name="safe_green">#81C784</color>
+    <color name="safe_green_bg">#1E3A27</color>
+    <color name="warning_orange">#FFB74D</color>
+
+    <!-- Surfaces & Neutrals for Dark Mode -->
+    <color name="background_light">#121212</color>
+    <color name="surface_card">#1E1E1E</color>
+    <color name="text_primary">#F0F0F0</color>
+    <color name="text_secondary">#C4C7C5</color>
+    <color name="text_hint">#8E918F</color>
+    <color name="divider_color">#2D2D2D</color>
+
+    <!-- Dark Mode Colors -->
+    <color name="background_dark">#121212</color>
+    <color name="surface_dark">#1E1E1E</color>
+    <color name="text_dark_primary">#F0F0F0</color>
+
+    <color name="white">#FFFFFF</color>
+    <color name="black">#000000</color>
+</resources>

@@ -1,14 +1,14 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources xmlns:tools="http://schemas.android.com/tools">
-    <!-- Base application theme. -->
+    <!-- Base application theme for Dark Mode. -->
     <style name="Theme.PestDetectApp" parent="Theme.Material3.DayNight.NoActionBar">
         <!-- Primary brand color. -->
         <item name="colorPrimary">@color/green_primary</item>
         <item name="colorPrimaryVariant">@color/green_primary_dark</item>
-        <item name="colorOnPrimary">@color/white</item>
+        <item name="colorOnPrimary">#121212</item>
         <!-- Secondary brand color. -->
         <item name="colorSecondary">@color/green_accent</item>
-        <item name="colorOnSecondary">@color/white</item>
+        <item name="colorOnSecondary">#121212</item>
         <!-- Surface and Background -->
         <item name="colorSurface">@color/surface_card</item>
         <item name="colorOnSurface">@color/text_primary</item>
@@ -17,7 +17,7 @@
         <item name="android:textColorPrimary">@color/text_primary</item>
         <item name="android:textColorSecondary">@color/text_secondary</item>
         <!-- Status bar color. -->
-        <item name="android:statusBarColor">@color/green_primary_dark</item>
+        <item name="android:statusBarColor">#121212</item>
         <item name="android:windowLightStatusBar">false</item>
     </style>
 
