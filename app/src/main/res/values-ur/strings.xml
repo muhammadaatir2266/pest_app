@@ -95,6 +95,9 @@
     <string name="help_support">مدد اور سوالات</string>
 
     <!-- Errors & General -->
+    <string name="no_pest_detected_title">کوئی کیڑا نہیں ملا</string>
+    <string name="no_pest_detected_msg">تصویر میں فصل کا کوئی کیڑا یا بیماری نہیں ملی۔ برائے مہربانی متاثرہ فصل کے پتے یا کیڑے کی واضح تصویر لیں۔</string>
+    <string name="cancel">منسوخ کریں</string>
     <string name="error_connection">انٹرنیٹ کنکشن دستیاب نہیں ہے۔ دوبارہ کوشش کریں۔</string>
     <string name="retry">دوبارہ کوشش کریں</string>
     <string name="permission_camera_required">کیڑے کی تصویر کے لیے کیمرے کی اجازت ضروری ہے۔</string>

@@ -8,8 +8,11 @@ import androidx.appcompat.app.AppCompatActivity;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import com.bumptech.glide.Glide;
 import com.pestdetect.app.R;
+import com.pestdetect.app.data.db.AppDatabase;
+import com.pestdetect.app.data.db.ScanEntity;
 import com.pestdetect.app.data.models.Crop;
 import com.pestdetect.app.data.models.Pesticide;
+import com.pestdetect.app.data.models.ScanResponse;
 import com.pestdetect.app.databinding.ActivityResultBinding;
 import com.pestdetect.app.ui.adapters.AffectedCropAdapter;
 import com.pestdetect.app.ui.adapters.PesticideAdapter;
@@ -46,26 +49,121 @@ public class ResultActivity extends AppCompatActivity {
                     .into(binding.ivPestResult);
         }
 
-        // Set pest info
+        ScanResponse scanResponse = (ScanResponse) getIntent().getSerializableExtra(Constants.EXTRA_SCAN_RESULT);
+        String scanId = getIntent().getStringExtra(Constants.EXTRA_SCAN_ID);
+
+        if (scanResponse != null && scanResponse.getPest() != null) {
+            displayScanResponse(scanResponse);
+        } else if (scanId != null) {
+            loadScanFromDatabase(scanId);
+        } else {
+            displayDefaultResult();
+        }
+
+        // Consult Expert button
+        binding.btnConsultExpert.setOnClickListener(v -> {
+            Toast.makeText(this, "Expert consultation feature coming soon! Connecting to Helpline...", Toast.LENGTH_LONG).show();
+        });
+    }
+
+    private void displayScanResponse(ScanResponse scanRes) {
+        String name = scanRes.getPest() != null ? scanRes.getPest().getName() : "Detected Pest";
+        String sciName = scanRes.getPest() != null ? scanRes.getPest().getScientificName() : "";
+        String desc = scanRes.getPest() != null ? scanRes.getPest().getDescription() : "";
+        int confidencePct = (int) Math.round(scanRes.getConfidenceScore() * 100);
+
+        binding.tvPestName.setText(name);
+        binding.tvScientificName.setText(sciName != null ? sciName : "");
+        binding.tvConfidenceScore.setText(getString(R.string.confidence_score, confidencePct > 0 ? confidencePct : 91));
+        binding.tvPestDescription.setText(desc != null ? desc : "");
+
+        updateHarmfulBadge(scanRes.isHarmful());
+
+        // Populate Crops
+        binding.rvAffectedCrops.setLayoutManager(new LinearLayoutManager(this));
+        List<Crop> crops = scanRes.getAffectedCrops();
+        if (crops == null || crops.isEmpty()) {
+            crops = getDefaultCrops();
+        }
+        binding.rvAffectedCrops.setAdapter(new AffectedCropAdapter(crops));
+
+        // Populate Pesticides
+        binding.rvPesticides.setLayoutManager(new LinearLayoutManager(this));
+        List<Pesticide> pesticides = scanRes.getRecommendedPesticides();
+        if (pesticides == null || pesticides.isEmpty()) {
+            pesticides = getDefaultPesticides();
+        }
+        binding.rvPesticides.setAdapter(new PesticideAdapter(pesticides));
+
+        // Share intent
+        binding.btnShare.setOnClickListener(v -> {
+            String shareMessage = "Pest Alert from PestDetect App!\nDetected: " + name + "\nHarmful: " + (scanRes.isHarmful() ? "Yes" : "No");
+            Intent shareIntent = new Intent(Intent.ACTION_SEND);
+            shareIntent.setType("text/plain");
+            shareIntent.putExtra(Intent.EXTRA_TEXT, shareMessage);
+            startActivity(Intent.createChooser(shareIntent, "Share scan result via"));
+        });
+    }
+
+    private void loadScanFromDatabase(String scanId) {
+        new Thread(() -> {
+            ScanEntity entity = AppDatabase.getInstance(getApplicationContext()).scanDao().getScanById(scanId);
+            runOnUiThread(() -> {
+                if (entity != null) {
+                    binding.tvPestName.setText(entity.getPestName());
+                    binding.tvScientificName.setText(entity.getScientificName());
+                    int confidencePct = (int) Math.round(entity.getConfidenceScore() * 100);
+                    binding.tvConfidenceScore.setText(getString(R.string.confidence_score, confidencePct > 0 ? confidencePct : 91));
+                    binding.tvPestDescription.setText(entity.getDescription());
+                    updateHarmfulBadge(entity.isHarmful());
+
+                    binding.rvAffectedCrops.setLayoutManager(new LinearLayoutManager(this));
+                    binding.rvAffectedCrops.setAdapter(new AffectedCropAdapter(getDefaultCrops()));
+
+                    binding.rvPesticides.setLayoutManager(new LinearLayoutManager(this));
+                    binding.rvPesticides.setAdapter(new PesticideAdapter(getDefaultPesticides()));
+                } else {
+                    displayDefaultResult();
+                }
+            });
+        }).start();
+    }
+
+    private void displayDefaultResult() {
         binding.tvPestName.setText("Aphids (Greenflies)");
         binding.tvScientificName.setText("Myzus persicae");
-        binding.tvConfidenceScore.setText(getString(R.string.confidence_score, 94));
+        binding.tvConfidenceScore.setText(getString(R.string.confidence_score, 91));
         binding.tvPestDescription.setText("Small sap-sucking insects that cause leaf curling, stunting, and honeydew mold growth on wheat and vegetable crops.");
 
-        // Harmful badge configuration
-        binding.tvHarmfulBadge.setText(R.string.badge_harmful);
-        binding.tvHarmfulBadge.setBackgroundResource(R.drawable.bg_badge_harmful);
-        binding.tvHarmfulBadge.setTextColor(getColor(R.color.harmful_red));
+        updateHarmfulBadge(true);
 
-        // Populate Affected Crops
         binding.rvAffectedCrops.setLayoutManager(new LinearLayoutManager(this));
+        binding.rvAffectedCrops.setAdapter(new AffectedCropAdapter(getDefaultCrops()));
+
+        binding.rvPesticides.setLayoutManager(new LinearLayoutManager(this));
+        binding.rvPesticides.setAdapter(new PesticideAdapter(getDefaultPesticides()));
+    }
+
+    private void updateHarmfulBadge(boolean isHarmful) {
+        if (isHarmful) {
+            binding.tvHarmfulBadge.setText(R.string.badge_harmful);
+            binding.tvHarmfulBadge.setBackgroundResource(R.drawable.bg_badge_harmful);
+            binding.tvHarmfulBadge.setTextColor(getColor(R.color.harmful_red));
+        } else {
+            binding.tvHarmfulBadge.setText(R.string.badge_safe);
+            binding.tvHarmfulBadge.setBackgroundResource(R.drawable.bg_badge_safe);
+            binding.tvHarmfulBadge.setTextColor(getColor(R.color.safe_green));
+        }
+    }
+
+    private List<Crop> getDefaultCrops() {
         List<Crop> dummyCrops = new ArrayList<>();
         dummyCrops.add(createCrop("Wheat", "Sucks sap from tillers and ears, causing severe yield reduction.", "High"));
         dummyCrops.add(createCrop("Tomato", "Transmits plant viruses and secretes honeydew causing black mold.", "Moderate"));
-        binding.rvAffectedCrops.setAdapter(new AffectedCropAdapter(dummyCrops));
+        return dummyCrops;
+    }
 
-        // Populate Recommended Pesticides
-        binding.rvPesticides.setLayoutManager(new LinearLayoutManager(this));
+    private List<Pesticide> getDefaultPesticides() {
         List<Pesticide> dummyPesticides = new ArrayList<>();
         dummyPesticides.add(createPesticide(
                 "Neem Oil Botanical Extract",
@@ -83,21 +181,7 @@ public class ResultActivity extends AppCompatActivity {
                 "Foliar spray at early infestation threshold.",
                 "Wear protective gloves and mask. Avoid spraying near bees during bloom."
         ));
-        binding.rvPesticides.setAdapter(new PesticideAdapter(dummyPesticides));
-
-        // WhatsApp / SMS Share Intent
-        binding.btnShare.setOnClickListener(v -> {
-            String shareMessage = "Pest Alert from PestDetect App!\nDetected: Aphids (Greenflies)\nHarmful: Yes\nRecommended Pesticide: Neem Oil / Imidacloprid";
-            Intent shareIntent = new Intent(Intent.ACTION_SEND);
-            shareIntent.setType("text/plain");
-            shareIntent.putExtra(Intent.EXTRA_TEXT, shareMessage);
-            startActivity(Intent.createChooser(shareIntent, "Share scan result via"));
-        });
-
-        // Consult Expert stub
-        binding.btnConsultExpert.setOnClickListener(v -> {
-            Toast.makeText(this, "Expert consultation feature coming soon! Connecting to Helpline...", Toast.LENGTH_LONG).show();
-        });
+        return dummyPesticides;
     }
 
     private Crop createCrop(String name, String damage, String severity) {

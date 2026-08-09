@@ -19,6 +19,9 @@ public interface ScanDao {
     @Insert(onConflict = OnConflictStrategy.REPLACE)
     void insertAll(List<ScanEntity> scans);
 
+    @Query("SELECT * FROM offline_scans WHERE id = :id LIMIT 1")
+    ScanEntity getScanById(String id);
+
     @Query("DELETE FROM offline_scans WHERE id = :id")
     void deleteScanById(String id);
 

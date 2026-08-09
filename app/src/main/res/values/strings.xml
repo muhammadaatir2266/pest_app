@@ -95,6 +95,9 @@
     <string name="help_support">Help &amp; FAQ</string>
 
     <!-- Errors & General -->
+    <string name="no_pest_detected_title">No Pest Detected</string>
+    <string name="no_pest_detected_msg">No agricultural pest or plant disease was detected in the scanned image. Please take a clear picture of an affected crop leaf or insect pest.</string>
+    <string name="cancel">Cancel</string>
     <string name="error_connection">Couldn\'t connect. Check your internet connection and try again.</string>
     <string name="retry">Retry</string>
     <string name="permission_camera_required">Camera permission is required to capture pest photos.</string>

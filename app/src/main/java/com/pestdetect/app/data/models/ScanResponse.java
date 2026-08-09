@@ -4,6 +4,8 @@ import java.io.Serializable;
 import java.util.List;
 
 public class ScanResponse implements Serializable {
+    private boolean isPestDetected = true;
+    private String message;
     private String scanId;
     private String imageUrl;
     private Pest pest;
@@ -12,6 +14,12 @@ public class ScanResponse implements Serializable {
     private List<Crop> affectedCrops;
     private List<Pesticide> recommendedPesticides;
     private String createdAt;
+
+    public boolean isPestDetected() { return isPestDetected; }
+    public void setPestDetected(boolean pestDetected) { isPestDetected = pestDetected; }
+
+    public String getMessage() { return message; }
+    public void setMessage(String message) { this.message = message; }
 
     public String getScanId() { return scanId; }
     public String getImageUrl() { return imageUrl; }
