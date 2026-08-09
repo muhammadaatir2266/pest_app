@@ -130,18 +130,8 @@ public class ResultActivity extends AppCompatActivity {
     }
 
     private void displayDefaultResult() {
-        binding.tvPestName.setText("Aphids (Greenflies)");
-        binding.tvScientificName.setText("Myzus persicae");
-        binding.tvConfidenceScore.setText(getString(R.string.confidence_score, 91));
-        binding.tvPestDescription.setText("Small sap-sucking insects that cause leaf curling, stunting, and honeydew mold growth on wheat and vegetable crops.");
-
-        updateHarmfulBadge(true);
-
-        binding.rvAffectedCrops.setLayoutManager(new LinearLayoutManager(this));
-        binding.rvAffectedCrops.setAdapter(new AffectedCropAdapter(getDefaultCrops()));
-
-        binding.rvPesticides.setLayoutManager(new LinearLayoutManager(this));
-        binding.rvPesticides.setAdapter(new PesticideAdapter(getDefaultPesticides()));
+        Toast.makeText(this, R.string.no_pest_detected_msg, Toast.LENGTH_SHORT).show();
+        finish();
     }
 
     private void updateHarmfulBadge(boolean isHarmful) {

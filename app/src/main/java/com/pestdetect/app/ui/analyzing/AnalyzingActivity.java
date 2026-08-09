@@ -93,35 +93,7 @@ public class AnalyzingActivity extends AppCompatActivity {
     }
 
     private void handleOfflineFallback(String filePath) {
-        if (filePath != null && isHumanOrNonPlantImage(filePath)) {
-            showNoPestDetectedDialog(getString(R.string.no_pest_detected_msg));
-            return;
-        }
-
-        // Save offline scan record
-        String scanId = UUID.randomUUID().toString();
-        ScanEntity scan = new ScanEntity(
-                scanId,
-                filePath != null ? filePath : "sample_pest.jpg",
-                "Aphids (Greenflies)",
-                "Myzus persicae",
-                "Small sap-sucking insects that cause leaf curling, stunting, and honeydew mold growth.",
-                0.91,
-                true,
-                new SimpleDateFormat("yyyy-MM-dd", Locale.getDefault()).format(new Date()),
-                false
-        );
-
-        new Thread(() -> {
-            AppDatabase.getInstance(getApplicationContext()).scanDao().insertScan(scan);
-            runOnUiThread(() -> {
-                Intent intent = new Intent(AnalyzingActivity.this, ResultActivity.class);
-                intent.putExtra(Constants.EXTRA_SCAN_ID, scanId);
-                intent.putExtra(Constants.EXTRA_IMAGE_PATH, filePath);
-                startActivity(intent);
-                finish();
-            });
-        }).start();
+        showNoPestDetectedDialog(getString(R.string.no_pest_detected_msg));
     }
 
     private boolean isHumanOrNonPlantImage(String filePath) {
