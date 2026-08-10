@@ -22,11 +22,26 @@ public class ScanResponse implements Serializable {
     public void setMessage(String message) { this.message = message; }
 
     public String getScanId() { return scanId; }
+    public void setScanId(String scanId) { this.scanId = scanId; }
+
     public String getImageUrl() { return imageUrl; }
+    public void setImageUrl(String imageUrl) { this.imageUrl = imageUrl; }
+
     public Pest getPest() { return pest; }
+    public void setPest(Pest pest) { this.pest = pest; }
+
     public double getConfidenceScore() { return confidenceScore; }
+    public void setConfidenceScore(double confidenceScore) { this.confidenceScore = confidenceScore; }
+
     public boolean isHarmful() { return isHarmful; }
+    public void setHarmful(boolean harmful) { isHarmful = harmful; }
+
     public List<Crop> getAffectedCrops() { return affectedCrops; }
+    public void setAffectedCrops(List<Crop> affectedCrops) { this.affectedCrops = affectedCrops; }
+
     public List<Pesticide> getRecommendedPesticides() { return recommendedPesticides; }
+    public void setRecommendedPesticides(List<Pesticide> recommendedPesticides) { this.recommendedPesticides = recommendedPesticides; }
+
     public String getCreatedAt() { return createdAt; }
+    public void setCreatedAt(String createdAt) { this.createdAt = createdAt; }
 }

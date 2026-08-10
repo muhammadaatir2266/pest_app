@@ -16,6 +16,7 @@ import com.pestdetect.app.data.api.ApiClient;
 import com.pestdetect.app.data.db.AppDatabase;
 import com.pestdetect.app.data.db.ScanEntity;
 import com.pestdetect.app.data.models.ApiResponse;
+import com.pestdetect.app.data.models.Pest;
 import com.pestdetect.app.data.models.ScanResponse;
 import com.pestdetect.app.databinding.ActivityAnalyzingBinding;
 import com.pestdetect.app.ui.camera.CameraActivity;
