@@ -94,29 +94,7 @@ public class AnalyzingActivity extends AppCompatActivity {
     }
 
     private void handleOfflineFallback(String filePath) {
-        if (isHumanOrNonPlantImage(filePath)) {
-            showNoPestDetectedDialog(getString(R.string.no_pest_detected_msg));
-            return;
-        }
-
-        ScanResponse scanRes = new ScanResponse();
-        scanRes.setPestDetected(true);
-        scanRes.setMessage("Pest analysis completed");
-        scanRes.setScanId(UUID.randomUUID().toString());
-        scanRes.setImageUrl(filePath);
-        scanRes.setConfidenceScore(0.88);
-        
-        Pest pest = new Pest();
-        pest.setId("offline-aphid-id");
-        pest.setName("Aphids (Greenflies)");
-        pest.setScientificName("Myzus persicae");
-        pest.setDescription("Small sap-sucking insects that cause leaf curling, stunting, and honeydew mold growth.");
-        pest.setHarmful(true);
-        pest.setImageUrl("https://images.unsplash.com/photo-1590740880194-e6fae853ca6c?w=500");
-        scanRes.setPest(pest);
-        scanRes.setHarmful(true);
-        
-        saveScanAndShowResult(scanRes, filePath);
+        showNoPestDetectedDialog(getString(R.string.no_pest_detected_msg));
     }
 
     private boolean isHumanOrNonPlantImage(String filePath) {
