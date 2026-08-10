@@ -94,6 +94,11 @@ public class AnalyzingActivity extends AppCompatActivity {
     }
 
     private void handleOfflineFallback(String filePath) {
+        if (isHumanOrNonPlantImage(filePath)) {
+            showNoPestDetectedDialog(getString(R.string.no_pest_detected_msg));
+            return;
+        }
+
         ScanResponse scanRes = new ScanResponse();
         scanRes.setPestDetected(true);
         scanRes.setMessage("Pest analysis completed");
@@ -150,7 +155,7 @@ public class AnalyzingActivity extends AppCompatActivity {
             float plantRatio = (float) plantGreenCount / sampledPixels;
 
             bitmap.recycle();
-            return (skinRatio > 0.65f && plantRatio < 0.05f);
+            return (skinRatio > 0.50f && plantRatio < 0.10f) || (plantRatio < 0.03f);
         } catch (Exception e) {
             Log.w(TAG, "Offline bitmap pixel check exception: " + e.getMessage());
             return false;
