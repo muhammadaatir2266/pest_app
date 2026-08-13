@@ -1,22 +1,43 @@
 package com.pestdetect.app.data.models;
 
+import com.google.gson.annotations.SerializedName;
+
 import java.io.Serializable;
 import java.util.List;
 
 public class ScanResponse implements Serializable {
-    private boolean isPestDetected = true;
+    @SerializedName("isPestDetected")
+    private boolean pestDetected;
+
+    @SerializedName("message")
     private String message;
+
+    @SerializedName("scanId")
     private String scanId;
+
+    @SerializedName("imageUrl")
     private String imageUrl;
+
+    @SerializedName("pest")
     private Pest pest;
+
+    @SerializedName("confidenceScore")
     private double confidenceScore;
-    private boolean isHarmful;
+
+    @SerializedName("isHarmful")
+    private boolean harmful;
+
+    @SerializedName("affectedCrops")
     private List<Crop> affectedCrops;
+
+    @SerializedName("recommendedPesticides")
     private List<Pesticide> recommendedPesticides;
+
+    @SerializedName("createdAt")
     private String createdAt;
 
-    public boolean isPestDetected() { return isPestDetected; }
-    public void setPestDetected(boolean pestDetected) { isPestDetected = pestDetected; }
+    public boolean isPestDetected() { return pestDetected; }
+    public void setPestDetected(boolean pestDetected) { this.pestDetected = pestDetected; }
 
     public String getMessage() { return message; }
     public void setMessage(String message) { this.message = message; }
@@ -33,8 +54,8 @@ public class ScanResponse implements Serializable {
     public double getConfidenceScore() { return confidenceScore; }
     public void setConfidenceScore(double confidenceScore) { this.confidenceScore = confidenceScore; }
 
-    public boolean isHarmful() { return isHarmful; }
-    public void setHarmful(boolean harmful) { isHarmful = harmful; }
+    public boolean isHarmful() { return harmful; }
+    public void setHarmful(boolean harmful) { this.harmful = harmful; }
 
     public List<Crop> getAffectedCrops() { return affectedCrops; }
     public void setAffectedCrops(List<Crop> affectedCrops) { this.affectedCrops = affectedCrops; }
