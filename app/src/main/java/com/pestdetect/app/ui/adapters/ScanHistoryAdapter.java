@@ -19,14 +19,24 @@ public class ScanHistoryAdapter extends RecyclerView.Adapter<ScanHistoryAdapter.
 
     private List<ScanEntity> scanList;
     private OnItemClickListener listener;
+    private OnItemLongClickListener longClickListener;
 
     public interface OnItemClickListener {
         void onItemClick(ScanEntity scan);
     }
 
+    public interface OnItemLongClickListener {
+        void onItemLongClick(ScanEntity scan);
+    }
+
     public ScanHistoryAdapter(List<ScanEntity> scanList, OnItemClickListener listener) {
+        this(scanList, listener, null);
+    }
+
+    public ScanHistoryAdapter(List<ScanEntity> scanList, OnItemClickListener listener, OnItemLongClickListener longClickListener) {
         this.scanList = scanList;
         this.listener = listener;
+        this.longClickListener = longClickListener;
     }
 
     public void updateData(List<ScanEntity> newList) {
@@ -87,6 +97,14 @@ public class ScanHistoryAdapter extends RecyclerView.Adapter<ScanHistoryAdapter.
 
         holder.itemView.setOnClickListener(v -> {
             if (listener != null) listener.onItemClick(scan);
+        });
+
+        holder.itemView.setOnLongClickListener(v -> {
+            if (longClickListener != null) {
+                longClickListener.onItemLongClick(scan);
+                return true;
+            }
+            return false;
         });
     }
 

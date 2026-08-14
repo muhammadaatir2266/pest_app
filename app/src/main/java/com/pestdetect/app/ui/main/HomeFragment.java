@@ -44,6 +44,13 @@ public class HomeFragment extends Fragment {
             startActivity(new Intent(requireContext(), CameraActivity.class));
         });
 
+        // View All button click listener -> Navigate to History tab
+        binding.tvViewAll.setOnClickListener(v -> {
+            if (getActivity() instanceof MainActivity) {
+                ((MainActivity) getActivity()).navigateToHistory();
+            }
+        });
+
         binding.rvRecentScans.setLayoutManager(new LinearLayoutManager(requireContext()));
         adapter = new ScanHistoryAdapter(new ArrayList<>(), scan -> {
             Intent intent = new Intent(requireContext(), ResultActivity.class);
@@ -67,7 +74,9 @@ public class HomeFragment extends Fragment {
                     } else {
                         binding.layoutEmptyState.setVisibility(View.GONE);
                         binding.rvRecentScans.setVisibility(View.VISIBLE);
-                        adapter.updateData(scans);
+                        // Show only the last 5 scans on Home screen
+                        List<ScanEntity> recentScans = scans.size() > 5 ? scans.subList(0, 5) : scans;
+                        adapter.updateData(recentScans);
                     }
                 });
             }

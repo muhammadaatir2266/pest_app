@@ -50,6 +50,12 @@ public class MainActivity extends AppCompatActivity {
         });
     }
 
+    public void navigateToHistory() {
+        if (binding != null && binding.bottomNav != null) {
+            binding.bottomNav.setSelectedItemId(R.id.nav_history);
+        }
+    }
+
     private void loadFragment(Fragment fragment) {
         getSupportFragmentManager()
                 .beginTransaction()

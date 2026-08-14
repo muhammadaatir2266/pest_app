@@ -105,4 +105,13 @@
     <string name="server_error_msg">پیسٹ ڈیٹیکشن سرور سے رابطہ نہیں ہو سکا۔ برائے مہربانی اپنا انٹرنیٹ چیک کریں اور دوبارہ کوشش کریں۔</string>
     <string name="retry">دوبارہ کوشش کریں</string>
     <string name="permission_camera_required">کیڑے کی تصویر کے لیے کیمرے کی اجازت ضروری ہے۔</string>
+    <string name="clear_all">تمام ہٹائیں</string>
+    <string name="clear_history_confirm_title">تمام اسکین ہسٹری ختم کریں؟</string>
+    <string name="clear_history_confirm_msg">کیا آپ تمام محفوظ شدہ پرانے اسکینز کی معلومات ہٹانا چاہتے ہیں؟</string>
+    <string name="delete_scan_confirm_title">اسکین ہٹائیں؟</string>
+    <string name="delete_scan_confirm_msg">کیا آپ اس اسکین کا ریکارڈ ہٹانا چاہتے ہیں؟</string>
+    <string name="delete">ہٹائیں</string>
+    <string name="history_cleared">اسکین ہسٹری ختم کر دی گئی ہے</string>
+    <string name="scan_deleted">اسکین ہٹا دیا گیا ہے</string>
+    <string name="no_history_yet">کوئی سابقہ اسکین نہیں ملا۔ پہلا اسکین کرنے کے لیے نیچے بٹن دبائیں!</string>
 </resources>
