@@ -71,27 +71,25 @@ public class ScanHistoryAdapter extends RecyclerView.Adapter<ScanHistoryAdapter.
             imageUrl = baseUrl + imageUrl;
         }
 
-        if (imageUrl != null && (imageUrl.startsWith("http://") || imageUrl.startsWith("https://"))) {
+        if (imageUrl != null && new File(imageUrl).exists()) {
+            Glide.with(holder.itemView.getContext())
+                    .load(new File(imageUrl))
+                    .centerCrop()
+                    .into(holder.ivPest);
+        } else if (imageUrl != null && (imageUrl.startsWith("http://") || imageUrl.startsWith("https://"))) {
             Glide.with(holder.itemView.getContext())
                     .load(imageUrl)
-                    .placeholder(android.R.drawable.ic_menu_gallery)
-                    .error(android.R.drawable.ic_menu_camera)
+                    .centerCrop()
                     .into(holder.ivPest);
         } else if (imageUrl != null && imageUrl.startsWith("content://")) {
             Glide.with(holder.itemView.getContext())
                     .load(Uri.parse(imageUrl))
-                    .placeholder(android.R.drawable.ic_menu_gallery)
-                    .error(android.R.drawable.ic_menu_camera)
+                    .centerCrop()
                     .into(holder.ivPest);
-        } else if (imageUrl != null && new File(imageUrl).exists()) {
+        } else if (imageUrl != null) {
             Glide.with(holder.itemView.getContext())
-                    .load(new File(imageUrl))
-                    .placeholder(android.R.drawable.ic_menu_gallery)
-                    .error(android.R.drawable.ic_menu_camera)
-                    .into(holder.ivPest);
-        } else {
-            Glide.with(holder.itemView.getContext())
-                    .load(android.R.drawable.ic_menu_gallery)
+                    .load(imageUrl)
+                    .centerCrop()
                     .into(holder.ivPest);
         }
 

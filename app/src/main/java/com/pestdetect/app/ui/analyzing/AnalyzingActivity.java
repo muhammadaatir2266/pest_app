@@ -92,7 +92,7 @@ public class AnalyzingActivity extends AppCompatActivity {
     private String resolveImagePath(String path) {
         if (path == null) return null;
 
-        // If it's a content:// URI, copy to a temp file
+        // If it's a content:// URI, copy to permanent internal app storage
         if (path.startsWith("content://")) {
             try {
                 Uri uri = Uri.parse(path);
@@ -102,7 +102,9 @@ public class AnalyzingActivity extends AppCompatActivity {
                     return null;
                 }
 
-                File tempFile = new File(getCacheDir(), "pest_scan_" + System.currentTimeMillis() + ".jpg");
+                File scansDir = new File(getFilesDir(), "scans");
+                if (!scansDir.exists()) scansDir.mkdirs();
+                File tempFile = new File(scansDir, "gallery_scan_" + System.currentTimeMillis() + ".jpg");
                 FileOutputStream fos = new FileOutputStream(tempFile);
                 byte[] buffer = new byte[8192];
                 int bytesRead;
@@ -112,11 +114,11 @@ public class AnalyzingActivity extends AppCompatActivity {
                 fos.close();
                 inputStream.close();
 
-                Log.d(TAG, "Copied content:// URI to temp file: " + tempFile.getAbsolutePath()
+                Log.d(TAG, "Copied content:// URI to permanent storage file: " + tempFile.getAbsolutePath()
                         + " (" + tempFile.length() + " bytes)");
                 return tempFile.getAbsolutePath();
             } catch (Exception e) {
-                Log.e(TAG, "Failed to copy content:// URI to temp file: " + e.getMessage());
+                Log.e(TAG, "Failed to copy content:// URI to permanent file: " + e.getMessage());
                 return null;
             }
         }
@@ -272,7 +274,32 @@ public class AnalyzingActivity extends AppCompatActivity {
                 }
             }
 
-            File compressedFile = new File(getCacheDir(), "compressed_scan_" + System.currentTimeMillis() + ".jpg");
+            File scansDir = new File(getFilesDir(), "scans");
+            if (!scansDir.exists()) scansDir.mkdirs();
+            File compressedFile = new File(scansDir, "compressed_scan_" + System.currentTimeMillis() + ".jpg");
+
+            // Apply EXIF Rotation Correction for Gallery & Camera photos
+            try {
+                androidx.exifinterface.media.ExifInterface ei = new androidx.exifinterface.media.ExifInterface(originalPath);
+                int orientation = ei.getAttributeInt(androidx.exifinterface.media.ExifInterface.TAG_ORIENTATION, androidx.exifinterface.media.ExifInterface.ORIENTATION_NORMAL);
+                int rotationDegrees = 0;
+                if (orientation == androidx.exifinterface.media.ExifInterface.ORIENTATION_ROTATE_90) rotationDegrees = 90;
+                else if (orientation == androidx.exifinterface.media.ExifInterface.ORIENTATION_ROTATE_180) rotationDegrees = 180;
+                else if (orientation == androidx.exifinterface.media.ExifInterface.ORIENTATION_ROTATE_270) rotationDegrees = 270;
+
+                if (rotationDegrees != 0) {
+                    android.graphics.Matrix matrix = new android.graphics.Matrix();
+                    matrix.postRotate(rotationDegrees);
+                    Bitmap rotated = Bitmap.createBitmap(bitmap, 0, 0, bitmap.getWidth(), bitmap.getHeight(), matrix, true);
+                    if (rotated != bitmap) {
+                        bitmap.recycle();
+                        bitmap = rotated;
+                    }
+                }
+            } catch (Exception e) {
+                Log.w(TAG, "Exif orientation read error: " + e.getMessage());
+            }
+
             FileOutputStream fos = new FileOutputStream(compressedFile);
             bitmap.compress(Bitmap.CompressFormat.JPEG, 85, fos);
             fos.flush();
@@ -329,10 +356,29 @@ public class AnalyzingActivity extends AppCompatActivity {
         String sciName = scanRes.getPest() != null ? scanRes.getPest().getScientificName() : "";
         String desc = scanRes.getPest() != null ? scanRes.getPest().getDescription() : "";
 
-        // Prioritize uploaded server/cloud image URL over temporary local cache file path
-        String savedImageUrl = (scanRes.getImageUrl() != null && !scanRes.getImageUrl().isEmpty())
-                ? scanRes.getImageUrl()
-                : filePath;
+        // Copy scan image to permanent internal app storage so local history never breaks
+        File scansDir = new File(getFilesDir(), "scans");
+        if (!scansDir.exists()) scansDir.mkdirs();
+        File permanentFile = new File(scansDir, "scan_" + System.currentTimeMillis() + ".jpg");
+
+        try {
+            File sourceFile = new File(filePath);
+            if (sourceFile.exists()) {
+                InputStream in = new java.io.FileInputStream(sourceFile);
+                FileOutputStream out = new FileOutputStream(permanentFile);
+                byte[] buf = new byte[8192];
+                int len;
+                while ((len = in.read(buf)) > 0) {
+                    out.write(buf, 0, len);
+                }
+                in.close();
+                out.close();
+            }
+        } catch (Exception e) {
+            Log.w(TAG, "Failed to save scan image to permanent storage: " + e.getMessage());
+        }
+
+        String savedImageUrl = permanentFile.exists() ? permanentFile.getAbsolutePath() : ((scanRes.getImageUrl() != null && !scanRes.getImageUrl().isEmpty()) ? scanRes.getImageUrl() : filePath);
 
         ScanEntity scan = new ScanEntity(
                 scanId,

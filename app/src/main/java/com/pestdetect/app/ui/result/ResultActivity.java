@@ -57,11 +57,6 @@ public class ResultActivity extends AppCompatActivity {
 
     private void loadImageIntoView(String imagePathOrUrl) {
         if (imagePathOrUrl == null || imagePathOrUrl.isEmpty()) {
-            Glide.with(this)
-                    .load("https://images.unsplash.com/photo-1590740880194-e6fae853ca6c?w=500")
-                    .placeholder(android.R.drawable.ic_menu_gallery)
-                    .error(android.R.drawable.ic_menu_gallery)
-                    .into(binding.ivPestResult);
             return;
         }
 
@@ -71,33 +66,27 @@ public class ResultActivity extends AppCompatActivity {
             fullUrl = baseUrl + imagePathOrUrl;
         }
 
-        if (fullUrl.startsWith("http://") || fullUrl.startsWith("https://")) {
+        File localFile = new File(fullUrl);
+        if (localFile.exists()) {
             Glide.with(this)
-                    .load(fullUrl)
-                    .placeholder(android.R.drawable.ic_menu_gallery)
-                    .error(android.R.drawable.ic_menu_gallery)
+                    .load(localFile)
+                    .fitCenter()
                     .into(binding.ivPestResult);
         } else if (fullUrl.startsWith("content://")) {
             Glide.with(this)
                     .load(Uri.parse(fullUrl))
-                    .placeholder(android.R.drawable.ic_menu_gallery)
-                    .error(android.R.drawable.ic_menu_gallery)
+                    .fitCenter()
+                    .into(binding.ivPestResult);
+        } else if (fullUrl.startsWith("http://") || fullUrl.startsWith("https://")) {
+            Glide.with(this)
+                    .load(fullUrl)
+                    .fitCenter()
                     .into(binding.ivPestResult);
         } else {
-            File file = new File(fullUrl);
-            if (file.exists()) {
-                Glide.with(this)
-                        .load(file)
-                        .placeholder(android.R.drawable.ic_menu_gallery)
-                        .error(android.R.drawable.ic_menu_gallery)
-                        .into(binding.ivPestResult);
-            } else {
-                Glide.with(this)
-                        .load("https://images.unsplash.com/photo-1590740880194-e6fae853ca6c?w=500")
-                        .placeholder(android.R.drawable.ic_menu_gallery)
-                        .error(android.R.drawable.ic_menu_gallery)
-                        .into(binding.ivPestResult);
-            }
+            Glide.with(this)
+                    .load(fullUrl)
+                    .fitCenter()
+                    .into(binding.ivPestResult);
         }
     }
 
