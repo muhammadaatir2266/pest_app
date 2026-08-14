@@ -25,6 +25,7 @@ import com.pestdetect.app.databinding.ActivityAnalyzingBinding;
 import com.pestdetect.app.ui.camera.CameraActivity;
 import com.pestdetect.app.ui.result.ResultActivity;
 import com.pestdetect.app.utils.Constants;
+import com.pestdetect.app.utils.EncryptedSessionManager;
 import com.pestdetect.app.utils.LocaleHelper;
 import com.pestdetect.app.utils.NetworkUtils;
 
@@ -148,9 +149,13 @@ public class AnalyzingActivity extends AppCompatActivity {
                 RequestBody requestFile = RequestBody.create(MediaType.parse("image/*"), finalUploadFile);
                 MultipartBody.Part body = MultipartBody.Part.createFormData("image", finalUploadFile.getName(), requestFile);
 
-                Log.d(TAG, "Sending image to backend: " + finalUploadFile.getName() + " (" + finalUploadFile.length() + " bytes)");
+                EncryptedSessionManager sessionManager = new EncryptedSessionManager(AnalyzingActivity.this);
+                String token = sessionManager.getAccessToken();
+                String authHeader = (token != null && !token.isEmpty() && !token.equals("demo-token")) ? "Bearer " + token : null;
 
-                ApiClient.getApiService().uploadScanImage(null, body).enqueue(new Callback<ApiResponse<ScanResponse>>() {
+                Log.d(TAG, "Sending image to backend: " + finalUploadFile.getName() + " (" + finalUploadFile.length() + " bytes), authHeader=" + (authHeader != null ? "PRESENT" : "NULL"));
+
+                ApiClient.getApiService().uploadScanImage(authHeader, body).enqueue(new Callback<ApiResponse<ScanResponse>>() {
                     @Override
                     public void onResponse(Call<ApiResponse<ScanResponse>> call, Response<ApiResponse<ScanResponse>> response) {
                         Log.d(TAG, "Backend response code: " + response.code());
@@ -206,7 +211,8 @@ public class AnalyzingActivity extends AppCompatActivity {
                         Log.e(TAG, "Backend analysis request failed: " + t.getMessage(), t);
                         if (NetworkUtils.isNetworkAvailable(AnalyzingActivity.this)) {
                             // Device has network connection, but request timed out or server failed to respond
-                            showServerErrorDialog(filePath);
+                            String detail = t != null && t.getMessage() != null ? t.getMessage() : (t != null ? t.toString() : "Unknown network error");
+                            showCustomErrorDialog(filePath, getString(R.string.server_error_msg) + "\n\nDetails: " + detail);
                         } else {
                             // Device is actually offline
                             showNoInternetDialog(filePath);
