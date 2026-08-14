@@ -179,7 +179,25 @@ public class AnalyzingActivity extends AppCompatActivity {
                             }
                         } else {
                             Log.w(TAG, "Backend analysis API non-200 response: " + response.code());
-                            showServerErrorDialog(filePath);
+                            String serverMsg = null;
+                            try {
+                                if (response.errorBody() != null) {
+                                    String errorString = response.errorBody().string();
+                                    Log.w(TAG, "Backend error body: " + errorString);
+                                    com.google.gson.JsonObject jsonObject = com.google.gson.JsonParser.parseString(errorString).getAsJsonObject();
+                                    if (jsonObject.has("message")) {
+                                        serverMsg = jsonObject.get("message").getAsString();
+                                    }
+                                }
+                            } catch (Exception e) {
+                                Log.e(TAG, "Failed to parse error body: " + e.getMessage());
+                            }
+
+                            if (serverMsg != null && !serverMsg.isEmpty()) {
+                                showCustomErrorDialog(filePath, serverMsg);
+                            } else {
+                                showServerErrorDialog(filePath);
+                            }
                         }
                     }
 
@@ -281,6 +299,18 @@ public class AnalyzingActivity extends AppCompatActivity {
         new AlertDialog.Builder(this)
                 .setTitle(R.string.server_error_title)
                 .setMessage(R.string.server_error_msg)
+                .setCancelable(false)
+                .setPositiveButton(R.string.retry, (dialog, which) -> performBackendAnalysis(filePath))
+                .setNegativeButton(R.string.cancel, (dialog, which) -> finish())
+                .show();
+    }
+
+    private void showCustomErrorDialog(String filePath, String message) {
+        if (isFinishing()) return;
+
+        new AlertDialog.Builder(this)
+                .setTitle(R.string.server_error_title)
+                .setMessage(message)
                 .setCancelable(false)
                 .setPositiveButton(R.string.retry, (dialog, which) -> performBackendAnalysis(filePath))
                 .setNegativeButton(R.string.cancel, (dialog, which) -> finish())
