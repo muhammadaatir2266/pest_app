@@ -43,11 +43,6 @@ public class MainActivity extends AppCompatActivity {
             }
             return false;
         });
-
-        // Center Elevated Scan FAB Button
-        binding.fabScan.setOnClickListener(v -> {
-            startActivity(new Intent(MainActivity.this, CameraActivity.class));
-        });
     }
 
     public void navigateToHistory() {
