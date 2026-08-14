@@ -146,7 +146,7 @@ public class AnalyzingActivity extends AppCompatActivity {
             final File finalUploadFile = uploadFile;
 
             runOnUiThread(() -> {
-                RequestBody requestFile = RequestBody.create(MediaType.parse("image/*"), finalUploadFile);
+                RequestBody requestFile = RequestBody.create(MediaType.parse("image/jpeg"), finalUploadFile);
                 MultipartBody.Part body = MultipartBody.Part.createFormData("image", finalUploadFile.getName(), requestFile);
 
                 EncryptedSessionManager sessionManager = new EncryptedSessionManager(AnalyzingActivity.this);

@@ -3,23 +3,26 @@ package com.pestdetect.app.data.api;
 import com.pestdetect.app.utils.Constants;
 
 import okhttp3.OkHttpClient;
+import okhttp3.Protocol;
 import okhttp3.logging.HttpLoggingInterceptor;
 import retrofit2.Retrofit;
 import retrofit2.converter.gson.GsonConverterFactory;
 
+import java.util.Arrays;
 import java.util.concurrent.TimeUnit;
 
 public class ApiClient {
 
     private static Retrofit retrofit = null;
 
-    public static ApiService getApiService() {
+    public static synchronized ApiService getApiService() {
         if (retrofit == null) {
             HttpLoggingInterceptor interceptor = new HttpLoggingInterceptor();
             interceptor.setLevel(HttpLoggingInterceptor.Level.BODY);
 
             OkHttpClient client = new OkHttpClient.Builder()
                     .addInterceptor(interceptor)
+                    .protocols(Arrays.asList(Protocol.HTTP_1_1))
                     .retryOnConnectionFailure(true)
                     .connectTimeout(60, TimeUnit.SECONDS)
                     .readTimeout(60, TimeUnit.SECONDS)
@@ -33,5 +36,9 @@ public class ApiClient {
                     .build();
         }
         return retrofit.create(ApiService.class);
+    }
+
+    public static synchronized void resetClient() {
+        retrofit = null;
     }
 }
