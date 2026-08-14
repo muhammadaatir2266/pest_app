@@ -138,51 +138,129 @@ public class AnalyzingActivity extends AppCompatActivity {
             return;
         }
 
-        File file = new File(filePath);
-        RequestBody requestFile = RequestBody.create(MediaType.parse("image/*"), file);
-        MultipartBody.Part body = MultipartBody.Part.createFormData("image", file.getName(), requestFile);
+        new Thread(() -> {
+            File uploadFile = getCompressedImageFile(filePath);
+            if (uploadFile == null) uploadFile = new File(filePath);
 
-        Log.d(TAG, "Sending image to backend: " + file.getName() + " (" + file.length() + " bytes)");
+            final File finalUploadFile = uploadFile;
 
-        ApiClient.getApiService().uploadScanImage(null, body).enqueue(new Callback<ApiResponse<ScanResponse>>() {
-            @Override
-            public void onResponse(Call<ApiResponse<ScanResponse>> call, Response<ApiResponse<ScanResponse>> response) {
-                Log.d(TAG, "Backend response code: " + response.code());
+            runOnUiThread(() -> {
+                RequestBody requestFile = RequestBody.create(MediaType.parse("image/*"), finalUploadFile);
+                MultipartBody.Part body = MultipartBody.Part.createFormData("image", finalUploadFile.getName(), requestFile);
 
-                if (response.isSuccessful() && response.body() != null) {
-                    ApiResponse<ScanResponse> apiResponse = response.body();
-                    ScanResponse scanRes = apiResponse.getData();
+                Log.d(TAG, "Sending image to backend: " + finalUploadFile.getName() + " (" + finalUploadFile.length() + " bytes)");
 
-                    Log.d(TAG, "API success=" + apiResponse.isSuccess() + ", message=" + apiResponse.getMessage());
+                ApiClient.getApiService().uploadScanImage(null, body).enqueue(new Callback<ApiResponse<ScanResponse>>() {
+                    @Override
+                    public void onResponse(Call<ApiResponse<ScanResponse>> call, Response<ApiResponse<ScanResponse>> response) {
+                        Log.d(TAG, "Backend response code: " + response.code());
 
-                    if (scanRes != null && scanRes.isPestDetected() && scanRes.getPest() != null) {
-                        Log.d(TAG, "✅ Pest detected via backend! Showing result...");
-                        saveScanAndShowResult(scanRes, filePath);
-                    } else if (scanRes != null && scanRes.getPest() != null && scanRes.getPest().getName() != null) {
-                        // Even if isPestDetected is false due to deserialization, check if pest object exists
-                        Log.d(TAG, "Pest object exists despite isPestDetected flag, forcing detection...");
-                        scanRes.setPestDetected(true);
-                        saveScanAndShowResult(scanRes, filePath);
-                    } else {
-                        // Backend explicitly reported no pest detected OR parsing failed
-                        String msg = (scanRes != null && scanRes.getMessage() != null && !scanRes.getMessage().isEmpty())
-                                ? scanRes.getMessage()
-                                : (apiResponse.getMessage() != null ? apiResponse.getMessage() : getString(R.string.no_pest_detected_msg));
-                        Log.w(TAG, "Backend response indicates no pest: " + msg);
-                        showNoPestDetectedDialog(msg);
+                        if (response.isSuccessful() && response.body() != null) {
+                            ApiResponse<ScanResponse> apiResponse = response.body();
+                            ScanResponse scanRes = apiResponse.getData();
+
+                            Log.d(TAG, "API success=" + apiResponse.isSuccess() + ", message=" + apiResponse.getMessage());
+
+                            if (scanRes != null && scanRes.isPestDetected() && scanRes.getPest() != null) {
+                                Log.d(TAG, "✅ Pest detected via backend! Showing result...");
+                                saveScanAndShowResult(scanRes, filePath);
+                            } else if (scanRes != null && scanRes.getPest() != null && scanRes.getPest().getName() != null) {
+                                // Even if isPestDetected is false due to deserialization, check if pest object exists
+                                Log.d(TAG, "Pest object exists despite isPestDetected flag, forcing detection...");
+                                scanRes.setPestDetected(true);
+                                saveScanAndShowResult(scanRes, filePath);
+                            } else {
+                                // Backend explicitly reported no pest detected OR parsing failed
+                                String msg = (scanRes != null && scanRes.getMessage() != null && !scanRes.getMessage().isEmpty())
+                                        ? scanRes.getMessage()
+                                        : (apiResponse.getMessage() != null ? apiResponse.getMessage() : getString(R.string.no_pest_detected_msg));
+                                Log.w(TAG, "Backend response indicates no pest: " + msg);
+                                showNoPestDetectedDialog(msg);
+                            }
+                        } else {
+                            Log.w(TAG, "Backend analysis API non-200 response: " + response.code());
+                            showServerErrorDialog(filePath);
+                        }
                     }
-                } else {
-                    Log.w(TAG, "Backend analysis API non-200 response: " + response.code());
-                    showServerErrorDialog(filePath);
+
+                    @Override
+                    public void onFailure(Call<ApiResponse<ScanResponse>> call, Throwable t) {
+                        Log.e(TAG, "Backend analysis request failed: " + t.getMessage(), t);
+                        if (NetworkUtils.isNetworkAvailable(AnalyzingActivity.this)) {
+                            // Device has network connection, but request timed out or server failed to respond
+                            showServerErrorDialog(filePath);
+                        } else {
+                            // Device is actually offline
+                            showNoInternetDialog(filePath);
+                        }
+                    }
+                });
+            });
+        }).start();
+    }
+
+    /**
+     * Compress and downsample image to max 1280px resolution and JPEG quality 85
+     * before uploading to backend. Reduces payload size from ~8MB to ~200KB.
+     */
+    private File getCompressedImageFile(String originalPath) {
+        if (originalPath == null) return null;
+        File originalFile = new File(originalPath);
+        if (!originalFile.exists()) return null;
+
+        try {
+            BitmapFactory.Options options = new BitmapFactory.Options();
+            options.inJustDecodeBounds = true;
+            BitmapFactory.decodeFile(originalPath, options);
+
+            int width = options.outWidth;
+            int height = options.outHeight;
+            int maxDimension = 1280;
+
+            int sampleSize = 1;
+            if (width > maxDimension || height > maxDimension) {
+                int halfWidth = width / 2;
+                int halfHeight = height / 2;
+                while ((halfWidth / sampleSize) >= maxDimension && (halfHeight / sampleSize) >= maxDimension) {
+                    sampleSize *= 2;
                 }
             }
 
-            @Override
-            public void onFailure(Call<ApiResponse<ScanResponse>> call, Throwable t) {
-                Log.e(TAG, "Backend analysis request failed: " + t.getMessage(), t);
-                showNoInternetDialog(filePath);
+            options.inJustDecodeBounds = false;
+            options.inSampleSize = sampleSize;
+            Bitmap bitmap = BitmapFactory.decodeFile(originalPath, options);
+
+            if (bitmap == null) return originalFile;
+
+            if (bitmap.getWidth() > maxDimension || bitmap.getHeight() > maxDimension) {
+                float aspectRatio = (float) bitmap.getWidth() / bitmap.getHeight();
+                int newWidth = maxDimension;
+                int newHeight = maxDimension;
+                if (aspectRatio > 1) {
+                    newHeight = Math.round(maxDimension / aspectRatio);
+                } else {
+                    newWidth = Math.round(maxDimension * aspectRatio);
+                }
+                Bitmap scaledBitmap = Bitmap.createScaledBitmap(bitmap, newWidth, newHeight, true);
+                if (scaledBitmap != bitmap) {
+                    bitmap.recycle();
+                    bitmap = scaledBitmap;
+                }
             }
-        });
+
+            File compressedFile = new File(getCacheDir(), "compressed_scan_" + System.currentTimeMillis() + ".jpg");
+            FileOutputStream fos = new FileOutputStream(compressedFile);
+            bitmap.compress(Bitmap.CompressFormat.JPEG, 85, fos);
+            fos.flush();
+            fos.close();
+            bitmap.recycle();
+
+            Log.d(TAG, "Compressed image: " + originalFile.length() + " bytes -> " + compressedFile.length() + " bytes");
+            return compressedFile;
+        } catch (Exception e) {
+            Log.w(TAG, "Image compression failed, using original file: " + e.getMessage());
+            return originalFile;
+        }
     }
 
     private void showNoInternetDialog(String filePath) {

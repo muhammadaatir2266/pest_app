@@ -18,14 +18,15 @@ public class NetworkUtils {
             if (activeNetwork == null) return false;
 
             NetworkCapabilities capabilities = cm.getNetworkCapabilities(activeNetwork);
-            return capabilities != null && (
+            if (capabilities == null) return false;
+
+            return capabilities.hasCapability(NetworkCapabilities.NET_CAPABILITY_INTERNET) ||
                     capabilities.hasTransport(NetworkCapabilities.TRANSPORT_WIFI) ||
                     capabilities.hasTransport(NetworkCapabilities.TRANSPORT_CELLULAR) ||
-                    capabilities.hasTransport(NetworkCapabilities.TRANSPORT_ETHERNET)
-            );
+                    capabilities.hasTransport(NetworkCapabilities.TRANSPORT_ETHERNET);
         } else {
             android.net.NetworkInfo activeNetworkInfo = cm.getActiveNetworkInfo();
-            return activeNetworkInfo != null && activeNetworkInfo.isConnected();
+            return activeNetworkInfo != null && activeNetworkInfo.isConnectedOrConnecting();
         }
     }
 }
