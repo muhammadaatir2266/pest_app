@@ -50,13 +50,44 @@ public class CameraActivity extends AppCompatActivity {
                 if (result.getResultCode() == RESULT_OK && result.getData() != null) {
                     Uri imageUri = result.getData().getData();
                     if (imageUri != null) {
-                        Intent intent = new Intent(this, ImagePreviewActivity.class);
-                        intent.putExtra(Constants.EXTRA_IMAGE_PATH, imageUri.toString());
-                        startActivity(intent);
-                        finish();
+                        String localFilePath = copyGalleryUriToLocalFile(imageUri);
+                        if (localFilePath != null) {
+                            Intent intent = new Intent(this, ImagePreviewActivity.class);
+                            intent.putExtra(Constants.EXTRA_IMAGE_PATH, localFilePath);
+                            startActivity(intent);
+                            finish();
+                        } else {
+                            Toast.makeText(this, "Failed to read selected gallery image.", Toast.LENGTH_SHORT).show();
+                        }
                     }
                 }
             });
+
+    private String copyGalleryUriToLocalFile(Uri uri) {
+        try {
+            java.io.InputStream inputStream = getContentResolver().openInputStream(uri);
+            if (inputStream == null) return null;
+
+            File scansDir = new File(getFilesDir(), "scans");
+            if (!scansDir.exists()) scansDir.mkdirs();
+
+            File destFile = new File(scansDir, "gallery_" + System.currentTimeMillis() + ".jpg");
+            java.io.FileOutputStream outputStream = new java.io.FileOutputStream(destFile);
+
+            byte[] buffer = new byte[8192];
+            int bytesRead;
+            while ((bytesRead = inputStream.read(buffer)) != -1) {
+                outputStream.write(buffer, 0, bytesRead);
+            }
+            outputStream.close();
+            inputStream.close();
+
+            return destFile.getAbsolutePath();
+        } catch (Exception e) {
+            android.util.Log.e("CameraActivity", "Error copying gallery Uri to local file: " + e.getMessage());
+            return null;
+        }
+    }
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {

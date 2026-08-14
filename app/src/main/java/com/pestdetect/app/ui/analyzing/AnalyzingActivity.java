@@ -92,10 +92,27 @@ public class AnalyzingActivity extends AppCompatActivity {
     private String resolveImagePath(String path) {
         if (path == null) return null;
 
-        // If it's a content:// URI, copy to permanent internal app storage
+        // If it's a content:// URI, copy to permanent internal app storage with EXIF rotation correction
         if (path.startsWith("content://")) {
             try {
                 Uri uri = Uri.parse(path);
+
+                // Read EXIF orientation directly from ContentResolver stream
+                int rotationDegrees = 0;
+                try {
+                    InputStream exifStream = getContentResolver().openInputStream(uri);
+                    if (exifStream != null) {
+                        androidx.exifinterface.media.ExifInterface ei = new androidx.exifinterface.media.ExifInterface(exifStream);
+                        int orientation = ei.getAttributeInt(androidx.exifinterface.media.ExifInterface.TAG_ORIENTATION, androidx.exifinterface.media.ExifInterface.ORIENTATION_NORMAL);
+                        if (orientation == androidx.exifinterface.media.ExifInterface.ORIENTATION_ROTATE_90) rotationDegrees = 90;
+                        else if (orientation == androidx.exifinterface.media.ExifInterface.ORIENTATION_ROTATE_180) rotationDegrees = 180;
+                        else if (orientation == androidx.exifinterface.media.ExifInterface.ORIENTATION_ROTATE_270) rotationDegrees = 270;
+                        exifStream.close();
+                    }
+                } catch (Exception e) {
+                    Log.w(TAG, "Failed to read EXIF from content Uri stream: " + e.getMessage());
+                }
+
                 InputStream inputStream = getContentResolver().openInputStream(uri);
                 if (inputStream == null) {
                     Log.e(TAG, "Could not open content:// URI input stream");
@@ -105,6 +122,25 @@ public class AnalyzingActivity extends AppCompatActivity {
                 File scansDir = new File(getFilesDir(), "scans");
                 if (!scansDir.exists()) scansDir.mkdirs();
                 File tempFile = new File(scansDir, "gallery_scan_" + System.currentTimeMillis() + ".jpg");
+
+                if (rotationDegrees != 0) {
+                    Bitmap originalBitmap = BitmapFactory.decodeStream(inputStream);
+                    inputStream.close();
+
+                    if (originalBitmap != null) {
+                        android.graphics.Matrix matrix = new android.graphics.Matrix();
+                        matrix.postRotate(rotationDegrees);
+                        Bitmap rotated = Bitmap.createBitmap(originalBitmap, 0, 0, originalBitmap.getWidth(), originalBitmap.getHeight(), matrix, true);
+                        FileOutputStream fos = new FileOutputStream(tempFile);
+                        rotated.compress(Bitmap.CompressFormat.JPEG, 92, fos);
+                        fos.flush();
+                        fos.close();
+                        originalBitmap.recycle();
+                        if (rotated != originalBitmap) rotated.recycle();
+                        return tempFile.getAbsolutePath();
+                    }
+                }
+
                 FileOutputStream fos = new FileOutputStream(tempFile);
                 byte[] buffer = new byte[8192];
                 int bytesRead;
