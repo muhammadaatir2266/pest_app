@@ -215,9 +215,14 @@ public class AnalyzingActivity extends AppCompatActivity {
         String sciName = scanRes.getPest() != null ? scanRes.getPest().getScientificName() : "";
         String desc = scanRes.getPest() != null ? scanRes.getPest().getDescription() : "";
 
+        // Prioritize uploaded server/cloud image URL over temporary local cache file path
+        String savedImageUrl = (scanRes.getImageUrl() != null && !scanRes.getImageUrl().isEmpty())
+                ? scanRes.getImageUrl()
+                : filePath;
+
         ScanEntity scan = new ScanEntity(
                 scanId,
-                filePath != null ? filePath : scanRes.getImageUrl(),
+                savedImageUrl,
                 pestName,
                 sciName,
                 desc,
@@ -233,7 +238,7 @@ public class AnalyzingActivity extends AppCompatActivity {
                 Intent intent = new Intent(AnalyzingActivity.this, ResultActivity.class);
                 intent.putExtra(Constants.EXTRA_SCAN_ID, scanId);
                 intent.putExtra(Constants.EXTRA_SCAN_RESULT, scanRes);
-                intent.putExtra(Constants.EXTRA_IMAGE_PATH, filePath);
+                intent.putExtra(Constants.EXTRA_IMAGE_PATH, savedImageUrl);
                 startActivity(intent);
                 finish();
             });

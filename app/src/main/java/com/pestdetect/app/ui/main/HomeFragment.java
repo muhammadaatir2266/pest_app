@@ -48,6 +48,7 @@ public class HomeFragment extends Fragment {
         adapter = new ScanHistoryAdapter(new ArrayList<>(), scan -> {
             Intent intent = new Intent(requireContext(), ResultActivity.class);
             intent.putExtra(Constants.EXTRA_SCAN_ID, scan.getId());
+            intent.putExtra(Constants.EXTRA_IMAGE_PATH, scan.getImageUrl());
             startActivity(intent);
         });
         binding.rvRecentScans.setAdapter(adapter);

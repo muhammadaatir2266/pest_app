@@ -10,6 +10,9 @@ import androidx.recyclerview.widget.RecyclerView;
 import com.bumptech.glide.Glide;
 import com.pestdetect.app.R;
 import com.pestdetect.app.data.db.ScanEntity;
+import android.net.Uri;
+import com.pestdetect.app.utils.Constants;
+import java.io.File;
 import java.util.List;
 
 public class ScanHistoryAdapter extends RecyclerView.Adapter<ScanHistoryAdapter.ViewHolder> {
@@ -52,11 +55,35 @@ public class ScanHistoryAdapter extends RecyclerView.Adapter<ScanHistoryAdapter.
             holder.tvStatus.setTextColor(holder.itemView.getContext().getColor(R.color.safe_green));
         }
 
-        Glide.with(holder.itemView.getContext())
-                .load(scan.getImageUrl())
-                .placeholder(android.R.drawable.ic_menu_gallery)
-                .error(android.R.drawable.ic_menu_camera)
-                .into(holder.ivPest);
+        String imageUrl = scan.getImageUrl();
+        if (imageUrl != null && imageUrl.startsWith("/uploads/")) {
+            String baseUrl = Constants.BASE_URL.replace("/api/", "").replaceAll("/+$", "");
+            imageUrl = baseUrl + imageUrl;
+        }
+
+        if (imageUrl != null && (imageUrl.startsWith("http://") || imageUrl.startsWith("https://"))) {
+            Glide.with(holder.itemView.getContext())
+                    .load(imageUrl)
+                    .placeholder(android.R.drawable.ic_menu_gallery)
+                    .error(android.R.drawable.ic_menu_camera)
+                    .into(holder.ivPest);
+        } else if (imageUrl != null && imageUrl.startsWith("content://")) {
+            Glide.with(holder.itemView.getContext())
+                    .load(Uri.parse(imageUrl))
+                    .placeholder(android.R.drawable.ic_menu_gallery)
+                    .error(android.R.drawable.ic_menu_camera)
+                    .into(holder.ivPest);
+        } else if (imageUrl != null && new File(imageUrl).exists()) {
+            Glide.with(holder.itemView.getContext())
+                    .load(new File(imageUrl))
+                    .placeholder(android.R.drawable.ic_menu_gallery)
+                    .error(android.R.drawable.ic_menu_camera)
+                    .into(holder.ivPest);
+        } else {
+            Glide.with(holder.itemView.getContext())
+                    .load(android.R.drawable.ic_menu_gallery)
+                    .into(holder.ivPest);
+        }
 
         holder.itemView.setOnClickListener(v -> {
             if (listener != null) listener.onItemClick(scan);

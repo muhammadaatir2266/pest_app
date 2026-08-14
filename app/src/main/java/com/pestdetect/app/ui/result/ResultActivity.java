@@ -36,18 +36,7 @@ public class ResultActivity extends AppCompatActivity {
         binding.btnBack.setOnClickListener(v -> finish());
 
         String imagePath = getIntent().getStringExtra(Constants.EXTRA_IMAGE_PATH);
-        if (imagePath != null) {
-            if (imagePath.startsWith("content://")) {
-                Glide.with(this).load(Uri.parse(imagePath)).into(binding.ivPestResult);
-            } else {
-                Glide.with(this).load(new File(imagePath)).into(binding.ivPestResult);
-            }
-        } else {
-            Glide.with(this)
-                    .load("https://images.unsplash.com/photo-1590740880194-e6fae853ca6c?w=500")
-                    .placeholder(android.R.drawable.ic_menu_gallery)
-                    .into(binding.ivPestResult);
-        }
+        loadImageIntoView(imagePath);
 
         ScanResponse scanResponse = (ScanResponse) getIntent().getSerializableExtra(Constants.EXTRA_SCAN_RESULT);
         String scanId = getIntent().getStringExtra(Constants.EXTRA_SCAN_ID);
@@ -64,6 +53,52 @@ public class ResultActivity extends AppCompatActivity {
         binding.btnConsultExpert.setOnClickListener(v -> {
             Toast.makeText(this, "Expert consultation feature coming soon! Connecting to Helpline...", Toast.LENGTH_LONG).show();
         });
+    }
+
+    private void loadImageIntoView(String imagePathOrUrl) {
+        if (imagePathOrUrl == null || imagePathOrUrl.isEmpty()) {
+            Glide.with(this)
+                    .load("https://images.unsplash.com/photo-1590740880194-e6fae853ca6c?w=500")
+                    .placeholder(android.R.drawable.ic_menu_gallery)
+                    .error(android.R.drawable.ic_menu_gallery)
+                    .into(binding.ivPestResult);
+            return;
+        }
+
+        String fullUrl = imagePathOrUrl;
+        if (fullUrl.startsWith("/uploads/")) {
+            String baseUrl = Constants.BASE_URL.replace("/api/", "").replaceAll("/+$", "");
+            fullUrl = baseUrl + imagePathOrUrl;
+        }
+
+        if (fullUrl.startsWith("http://") || fullUrl.startsWith("https://")) {
+            Glide.with(this)
+                    .load(fullUrl)
+                    .placeholder(android.R.drawable.ic_menu_gallery)
+                    .error(android.R.drawable.ic_menu_gallery)
+                    .into(binding.ivPestResult);
+        } else if (fullUrl.startsWith("content://")) {
+            Glide.with(this)
+                    .load(Uri.parse(fullUrl))
+                    .placeholder(android.R.drawable.ic_menu_gallery)
+                    .error(android.R.drawable.ic_menu_gallery)
+                    .into(binding.ivPestResult);
+        } else {
+            File file = new File(fullUrl);
+            if (file.exists()) {
+                Glide.with(this)
+                        .load(file)
+                        .placeholder(android.R.drawable.ic_menu_gallery)
+                        .error(android.R.drawable.ic_menu_gallery)
+                        .into(binding.ivPestResult);
+            } else {
+                Glide.with(this)
+                        .load("https://images.unsplash.com/photo-1590740880194-e6fae853ca6c?w=500")
+                        .placeholder(android.R.drawable.ic_menu_gallery)
+                        .error(android.R.drawable.ic_menu_gallery)
+                        .into(binding.ivPestResult);
+            }
+        }
     }
 
     private void displayScanResponse(ScanResponse scanRes) {
@@ -110,6 +145,7 @@ public class ResultActivity extends AppCompatActivity {
             ScanEntity entity = AppDatabase.getInstance(getApplicationContext()).scanDao().getScanById(scanId);
             runOnUiThread(() -> {
                 if (entity != null) {
+                    loadImageIntoView(entity.getImageUrl());
                     binding.tvPestName.setText(entity.getPestName());
                     binding.tvScientificName.setText(entity.getScientificName());
                     int confidencePct = (int) Math.round(entity.getConfidenceScore() * 100);
