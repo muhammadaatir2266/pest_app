@@ -99,6 +99,10 @@
     <string name="no_pest_detected_msg">No agricultural pest or plant disease was detected in the scanned image. Please take a clear picture of an affected crop leaf or insect pest.</string>
     <string name="cancel">Cancel</string>
     <string name="error_connection">Couldn\'t connect. Check your internet connection and try again.</string>
+    <string name="no_internet_title">No Internet Connection</string>
+    <string name="no_internet_msg">Internet connection is required to analyze pest images accurately. Please check your connection and try again.</string>
+    <string name="server_error_title">Server Connection Failed</string>
+    <string name="server_error_msg">Could not connect to the pest detection server. Please ensure your backend is running and check your connection.</string>
     <string name="retry">Retry</string>
     <string name="permission_camera_required">Camera permission is required to capture pest photos.</string>
 </resources>

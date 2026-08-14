@@ -26,6 +26,7 @@ import com.pestdetect.app.ui.camera.CameraActivity;
 import com.pestdetect.app.ui.result.ResultActivity;
 import com.pestdetect.app.utils.Constants;
 import com.pestdetect.app.utils.LocaleHelper;
+import com.pestdetect.app.utils.NetworkUtils;
 
 import java.io.File;
 import java.io.FileOutputStream;
@@ -75,8 +76,8 @@ public class AnalyzingActivity extends AppCompatActivity {
                 if (resolvedFilePath != null && new File(resolvedFilePath).exists()) {
                     performBackendAnalysis(resolvedFilePath);
                 } else {
-                    Log.w(TAG, "Could not resolve image to valid file, trying offline fallback");
-                    handleOfflineFallback(imagePath);
+                    Log.w(TAG, "Could not resolve image to valid file");
+                    showNoPestDetectedDialog(getString(R.string.no_pest_detected_msg));
                 }
             });
         }).start();
@@ -130,6 +131,13 @@ public class AnalyzingActivity extends AppCompatActivity {
     }
 
     private void performBackendAnalysis(String filePath) {
+        // Check internet connection before starting analysis
+        if (!NetworkUtils.isNetworkAvailable(this)) {
+            Log.w(TAG, "No internet connection available. Cancelling backend analysis.");
+            showNoInternetDialog(filePath);
+            return;
+        }
+
         File file = new File(filePath);
         RequestBody requestFile = RequestBody.create(MediaType.parse("image/*"), file);
         MultipartBody.Part body = MultipartBody.Part.createFormData("image", file.getName(), requestFile);
@@ -147,23 +155,6 @@ public class AnalyzingActivity extends AppCompatActivity {
 
                     Log.d(TAG, "API success=" + apiResponse.isSuccess() + ", message=" + apiResponse.getMessage());
 
-                    if (scanRes != null) {
-                        Log.d(TAG, "ScanResponse: isPestDetected=" + scanRes.isPestDetected()
-                                + ", pest=" + (scanRes.getPest() != null ? scanRes.getPest().getName() : "NULL")
-                                + ", confidence=" + scanRes.getConfidenceScore()
-                                + ", message=" + scanRes.getMessage());
-
-                        // Try raw JSON logging for debugging deserialization issues
-                        try {
-                            String rawBody = new com.google.gson.Gson().toJson(apiResponse);
-                            Log.d(TAG, "Raw parsed response (first 500 chars): " + rawBody.substring(0, Math.min(rawBody.length(), 500)));
-                        } catch (Exception e) {
-                            Log.w(TAG, "Could not log raw response");
-                        }
-                    } else {
-                        Log.e(TAG, "ScanResponse data is NULL!");
-                    }
-
                     if (scanRes != null && scanRes.isPestDetected() && scanRes.getPest() != null) {
                         Log.d(TAG, "✅ Pest detected via backend! Showing result...");
                         saveScanAndShowResult(scanRes, filePath);
@@ -172,225 +163,50 @@ public class AnalyzingActivity extends AppCompatActivity {
                         Log.d(TAG, "Pest object exists despite isPestDetected flag, forcing detection...");
                         scanRes.setPestDetected(true);
                         saveScanAndShowResult(scanRes, filePath);
-                    } else if (scanRes != null && scanRes.getConfidenceScore() > 0) {
-                        // Backend returned a confidence score but pest object might be missing
-                        // This can happen if DB fetch failed on the server side
-                        Log.d(TAG, "Backend returned confidence but no pest object, using local fallback with confidence");
-                        handleOfflineFallback(filePath);
                     } else {
-                        // Backend explicitly said no pest detected OR parsing failed
-                        // Fall back to local detection to give it one more chance
-                        String msg = (scanRes != null && scanRes.getMessage() != null) ? scanRes.getMessage() : null;
-                        Log.w(TAG, "Backend says no pest: " + msg + ", trying local fallback...");
-                        handleOfflineFallback(filePath);
+                        // Backend explicitly reported no pest detected OR parsing failed
+                        String msg = (scanRes != null && scanRes.getMessage() != null && !scanRes.getMessage().isEmpty())
+                                ? scanRes.getMessage()
+                                : (apiResponse.getMessage() != null ? apiResponse.getMessage() : getString(R.string.no_pest_detected_msg));
+                        Log.w(TAG, "Backend response indicates no pest: " + msg);
+                        showNoPestDetectedDialog(msg);
                     }
                 } else {
                     Log.w(TAG, "Backend analysis API non-200 response: " + response.code());
-                    try {
-                        if (response.errorBody() != null) {
-                            Log.w(TAG, "Error body: " + response.errorBody().string());
-                        }
-                    } catch (Exception e) {
-                        Log.w(TAG, "Could not read error body");
-                    }
-                    handleOfflineFallback(filePath);
+                    showServerErrorDialog(filePath);
                 }
             }
 
             @Override
             public void onFailure(Call<ApiResponse<ScanResponse>> call, Throwable t) {
                 Log.e(TAG, "Backend analysis request failed: " + t.getMessage(), t);
-                handleOfflineFallback(filePath);
+                showNoInternetDialog(filePath);
             }
         });
     }
 
-    /**
-     * Offline fallback: performs local pixel-based pest detection.
-     * Instead of always showing "No Pest Detected", this actually analyzes the image
-     * and creates a local detection result if the image looks like a plant/pest.
-     */
-    private void handleOfflineFallback(String filePath) {
-        Log.w(TAG, "Running offline fallback for: " + filePath);
+    private void showNoInternetDialog(String filePath) {
+        if (isFinishing()) return;
 
-        new Thread(() -> {
-            // Try to resolve the path if it's a content:// URI we haven't resolved yet
-            String localPath = filePath;
-            if (filePath != null && filePath.startsWith("content://") && resolvedFilePath != null) {
-                localPath = resolvedFilePath;
-            }
-
-            final boolean isHumanImage = isHumanOrNonPlantImage(localPath);
-            Log.d(TAG, "Offline pixel analysis: isHuman=" + isHumanImage + " for " + localPath);
-
-            runOnUiThread(() -> {
-                if (isHumanImage) {
-                    // Image is clearly a human/non-plant - show no pest detected
-                    showNoPestDetectedDialog(getString(R.string.no_pest_detected_msg));
-                } else {
-                    // Image looks like it could be a plant/pest - create a local result
-                    Log.d(TAG, "✅ Offline fallback: image appears to be plant/pest, creating local result");
-                    createLocalDetectionResult(filePath);
-                }
-            });
-        }).start();
+        new AlertDialog.Builder(this)
+                .setTitle(R.string.no_internet_title)
+                .setMessage(R.string.no_internet_msg)
+                .setCancelable(false)
+                .setPositiveButton(R.string.retry, (dialog, which) -> performBackendAnalysis(filePath))
+                .setNegativeButton(R.string.cancel, (dialog, which) -> finish())
+                .show();
     }
 
-    /**
-     * Create a local detection result when the backend is unavailable
-     * but the image appears to be a valid plant/pest image.
-     */
-    private void createLocalDetectionResult(String filePath) {
-        ScanResponse scanRes = new ScanResponse();
-        scanRes.setPestDetected(true);
-        scanRes.setScanId(UUID.randomUUID().toString());
-        scanRes.setImageUrl(filePath);
-        scanRes.setConfidenceScore(0.80);
-        scanRes.setHarmful(true);
+    private void showServerErrorDialog(String filePath) {
+        if (isFinishing()) return;
 
-        // Determine pest type based on pixel analysis
-        String pestType = determineLocalPestType(filePath);
-
-        Pest pest = new Pest();
-        switch (pestType) {
-            case "whitefly":
-                pest.setId("local-whitefly");
-                pest.setName("Whitefly");
-                pest.setScientificName("Bemisia tabaci");
-                pest.setDescription("Tiny white flying insects sucking sap from crop leaves, transmitting leaf curl viruses.");
-                pest.setHarmful(true);
-                break;
-            case "armyworm":
-                pest.setId("local-armyworm");
-                pest.setName("Fall Armyworm");
-                pest.setScientificName("Spodoptera frugiperda");
-                pest.setDescription("Voracious caterpillar that eats leaves, whorls, and ears of maize and wheat crops.");
-                pest.setHarmful(true);
-                break;
-            case "ladybug":
-                pest.setId("local-ladybug");
-                pest.setName("Ladybug (Ladybird Beetle)");
-                pest.setScientificName("Coccinellidae");
-                pest.setDescription("Beneficial predatory insect that feeds on aphids and mites. Highly beneficial for crops!");
-                pest.setHarmful(false);
-                scanRes.setHarmful(false);
-                break;
-            default:
-                pest.setId("local-aphid");
-                pest.setName("Aphids (Greenflies)");
-                pest.setScientificName("Myzus persicae");
-                pest.setDescription("Small sap-sucking insects that cause leaf curling, stunting, and honeydew mold growth.");
-                pest.setHarmful(true);
-                break;
-        }
-
-        scanRes.setPest(pest);
-        scanRes.setMessage("Pest detected (offline analysis)");
-
-        saveScanAndShowResult(scanRes, filePath);
-    }
-
-    /**
-     * Determine pest type from pixel analysis for offline fallback
-     */
-    private String determineLocalPestType(String filePath) {
-        try {
-            String localPath = filePath;
-            if (filePath != null && filePath.startsWith("content://") && resolvedFilePath != null) {
-                localPath = resolvedFilePath;
-            }
-            if (localPath == null) return "aphid";
-
-            BitmapFactory.Options options = new BitmapFactory.Options();
-            options.inSampleSize = 4;
-            Bitmap bitmap = BitmapFactory.decodeFile(localPath, options);
-            if (bitmap == null) return "aphid";
-
-            int width = bitmap.getWidth();
-            int height = bitmap.getHeight();
-            int totalSampled = 0;
-            int whiteCount = 0;
-            int brownCount = 0;
-            int redOrangeCount = 0;
-
-            for (int x = 0; x < width; x += 3) {
-                for (int y = 0; y < height; y += 3) {
-                    int pixel = bitmap.getPixel(x, y);
-                    int r = Color.red(pixel);
-                    int g = Color.green(pixel);
-                    int b = Color.blue(pixel);
-                    totalSampled++;
-
-                    if (r > 180 && g > 180 && b > 180) whiteCount++;
-                    if (r > 80 && g < 110 && b < 80 && r > g) brownCount++;
-                    if (r > 150 && g > 50 && g < 130 && b < 80) redOrangeCount++;
-                }
-            }
-
-            bitmap.recycle();
-
-            float whiteRatio = (float) whiteCount / totalSampled;
-            float brownRatio = (float) brownCount / totalSampled;
-            float redOrangeRatio = (float) redOrangeCount / totalSampled;
-
-            Log.d(TAG, "Local pest type analysis: white=" + (whiteRatio * 100) + "%, brown=" + (brownRatio * 100)
-                    + "%, redOrange=" + (redOrangeRatio * 100) + "%");
-
-            if (redOrangeRatio > 0.03) return "ladybug";
-            if (whiteRatio > 0.05) return "whitefly";
-            if (brownRatio > 0.06) return "armyworm";
-            return "aphid";
-        } catch (Exception e) {
-            Log.w(TAG, "Local pest type detection failed: " + e.getMessage());
-            return "aphid";
-        }
-    }
-
-    private boolean isHumanOrNonPlantImage(String filePath) {
-        try {
-            if (filePath == null) return false;
-            BitmapFactory.Options options = new BitmapFactory.Options();
-            options.inSampleSize = 4;
-            Bitmap bitmap = BitmapFactory.decodeFile(filePath, options);
-            if (bitmap == null) return false;
-
-            int width = bitmap.getWidth();
-            int height = bitmap.getHeight();
-            int totalPixels = width * height;
-            int skinCount = 0;
-            int plantGreenCount = 0;
-
-            for (int x = 0; x < width; x += 3) {
-                for (int y = 0; y < height; y += 3) {
-                    int pixel = bitmap.getPixel(x, y);
-                    int r = Color.red(pixel);
-                    int g = Color.green(pixel);
-                    int b = Color.blue(pixel);
-
-                    // Human skin tone check
-                    if (r > 90 && g > 55 && b > 30 && r > g && r > b && (r - g) >= 15) {
-                        skinCount++;
-                    }
-                    // Plant green check
-                    if (g > r && g > b && g > 30) {
-                        plantGreenCount++;
-                    }
-                }
-            }
-
-            int sampledPixels = totalPixels / 9;
-            float skinRatio = (float) skinCount / sampledPixels;
-            float plantRatio = (float) plantGreenCount / sampledPixels;
-
-            Log.d(TAG, "Pixel analysis: skinRatio=" + (skinRatio * 100) + "%, plantRatio=" + (plantRatio * 100) + "%");
-
-            bitmap.recycle();
-            // Only reject as human if overwhelmingly skin-toned with virtually no green
-            return (skinRatio > 0.65f && plantRatio < 0.03f);
-        } catch (Exception e) {
-            Log.w(TAG, "Offline bitmap pixel check exception: " + e.getMessage());
-            return false;
-        }
+        new AlertDialog.Builder(this)
+                .setTitle(R.string.server_error_title)
+                .setMessage(R.string.server_error_msg)
+                .setCancelable(false)
+                .setPositiveButton(R.string.retry, (dialog, which) -> performBackendAnalysis(filePath))
+                .setNegativeButton(R.string.cancel, (dialog, which) -> finish())
+                .show();
     }
 
     private void saveScanAndShowResult(ScanResponse scanRes, String filePath) {

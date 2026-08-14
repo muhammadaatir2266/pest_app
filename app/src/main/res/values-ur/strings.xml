@@ -99,6 +99,10 @@
     <string name="no_pest_detected_msg">تصویر میں فصل کا کوئی کیڑا یا بیماری نہیں ملی۔ برائے مہربانی متاثرہ فصل کے پتے یا کیڑے کی واضح تصویر لیں۔</string>
     <string name="cancel">منسوخ کریں</string>
     <string name="error_connection">انٹرنیٹ کنکشن دستیاب نہیں ہے۔ دوبارہ کوشش کریں۔</string>
+    <string name="no_internet_title">انٹرنیٹ کنکشن موجود نہیں</string>
+    <string name="no_internet_msg">کیڑے کی درست شناخت کے لیے انٹرنیٹ کنکشن ضروری ہے۔ برائے مہربانی اپنا انٹرنیٹ چیک کریں اور دوبارہ کوشش کریں۔</string>
+    <string name="server_error_title">سرور سے رابطہ نہ ہو سکا</string>
+    <string name="server_error_msg">پیسٹ ڈیٹیکشن سرور سے رابطہ نہیں ہو سکا۔ برائے مہربانی اپنا انٹرنیٹ چیک کریں اور دوبارہ کوشش کریں۔</string>
     <string name="retry">دوبارہ کوشش کریں</string>
     <string name="permission_camera_required">کیڑے کی تصویر کے لیے کیمرے کی اجازت ضروری ہے۔</string>
 </resources>
